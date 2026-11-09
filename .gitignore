@@ -20,6 +20,9 @@ dist/
 _site/
 coverage/
 
+# Local source assets (optimised copies live in backend/assets/)
+/img/
+
 # QA / screenshots / temporary files
 qa-*.png
 qa/

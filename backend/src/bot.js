@@ -1,3 +1,6 @@
+import path from 'node:path';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { Telegraf, Markup } from 'telegraf';
 import { logger } from './utils/logger.js';
 import { calculatePlan } from './services/nutrition.js';
@@ -7,6 +10,12 @@ import { parseFoodMessage, describeParse } from './services/foodParser.js';
 import { recognizeFoodPhoto } from './services/vision.service.js';
 import { humanDate, isValidTimeString, localDate, localTime, safeTimezone } from './utils/time.js';
 import { getDashboard } from './services/stats.service.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** Welcome image shipped with the backend (see backend/assets/). */
+export const WELCOME_PHOTO_PATH = path.resolve(__dirname, '../assets/caloria-welcome.jpg');
+const CAPTION_LIMIT = 1024;
 
 const escapeHtml = (value = '') =>
   String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -131,10 +140,23 @@ export function createBot({ config, repository }) {
   bot.start(async (ctx) => {
     try {
       const user = await ensureBotUser(repository, ctx.from, config);
-      await ctx.reply(welcomeText(user, config), {
-        parse_mode: 'HTML',
-        ...openAppButton(config),
-      });
+      const text = welcomeText(user, config);
+      const extra = { parse_mode: 'HTML', ...openAppButton(config) };
+
+      if (existsSync(WELCOME_PHOTO_PATH)) {
+        try {
+          const caption = text.length <= CAPTION_LIMIT ? text : '✨ <b>Добро пожаловать в CALORIA!</b>';
+          await ctx.replyWithPhoto({ source: WELCOME_PHOTO_PATH }, { caption, ...extra });
+          if (caption !== text) await ctx.reply(text, extra);
+          return;
+        } catch (error) {
+          logger.warn('Welcome photo could not be sent, falling back to text', {
+            reason: error.message,
+          });
+        }
+      }
+
+      await ctx.reply(text, extra);
     } catch (error) {
       logger.error('Bot /start failed', { reason: error.message });
       await ctx.reply('Не удалось открыть профиль. Попробуйте позже.');

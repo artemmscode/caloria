@@ -54,7 +54,7 @@ CALORIA — это полноценная экосистема из четырё
 
 ### Telegram-бот
 
-- `/start` — приветствие и inline-кнопка **«ОТКРЫТЬ CALORIA»**.
+- `/start` — приветствие с картинкой и inline-кнопка **«ОТКРЫТЬ CALORIA»** (если фото не отправилось, бот пришлёт текст).
 - `/app` — открыть Mini App.
 - `/today` — сводка за текущий день.
 - `/help` — команды и подсказки.
@@ -73,7 +73,7 @@ CALORIA — это полноценная экосистема из четырё
 - Планировщик напоминаний (node-cron, ежесекундная проверка раз в минуту) + endpoint `/api/cron/tick` для внешнего пинга.
 - Webhook Telegram с секретным заголовком; polling — только в development.
 - Graceful shutdown по SIGTERM/SIGINT.
-- 53 автоматических теста: API, конфигурация, авторизация, формулы, парсер, сценарии бота, защита webhook, часовые пояса, планировщик.
+- 54 автоматических теста: API, конфигурация, авторизация, формулы, парсер, сценарии бота, приветственное фото, защита webhook, часовые пояса, планировщик.
 
 ---
 
@@ -124,6 +124,7 @@ caloria/
 │   │   └── utils/
 │   ├── test/                 # node:test
 │   ├── scripts/              # db:check — read-only проверка Supabase
+│   ├── assets/               # caloria-welcome.jpg — картинка приветствия /start
 │   ├── package.json
 │   └── .env.example
 ├── database/
@@ -189,7 +190,7 @@ npm run dev:web
 
 ```bash
 # из корня
-npm test          # backend (53 теста) + frontend (8 тестов)
+npm test          # backend (54 теста) + frontend (8 тестов)
 npm run check     # синтаксис всех JS-файлов
 ```
 
