@@ -30,6 +30,21 @@ const appButton = (config, text = 'ОТКРЫТЬ CALORIA', suffix = '') => {
 
 const openAppButton = (config) => Markup.inlineKeyboard([[appButton(config)]]);
 
+/**
+ * Telegram can fetch a photo by public HTTPS URL. Uploading multipart from some
+ * hosts (Render) fails with "socket hang up", so in production the bot points
+ * Telegram at the copy published with the Mini App on GitHub Pages. Locally the
+ * file is uploaded from disk instead.
+ */
+const welcomePhotoUrl = (config) => {
+  if (!isSecureUrl(config.miniAppUrl)) return null;
+  try {
+    return new URL('assets/caloria-welcome.jpg', config.miniAppUrl).toString();
+  } catch {
+    return null;
+  }
+};
+
 const timeEditing = new Map();
 
 export async function ensureBotUser(repository, from, config) {
@@ -137,18 +152,26 @@ export function createBot({ config, repository }) {
       const text = welcomeText(user, config);
       const extra = { parse_mode: 'HTML', ...openAppButton(config) };
 
-      if (hasWelcomePhoto()) {
-        try {
-          const caption = text.length <= CAPTION_LIMIT ? text : '✨ <b>Добро пожаловать в CALORIA!</b>';
-          await ctx.replyWithPhoto({ source: WELCOME_PHOTO_PATH }, { caption, ...extra });
-          noteWelcomePhotoSuccess();
-          if (caption !== text) await ctx.reply(text, extra);
-          return;
-        } catch (error) {
-          noteWelcomePhotoError(error.message);
-          logger.warn('Welcome photo could not be sent, falling back to text', {
-            reason: error.message,
-          });
+      const photoCandidates = [];
+      const photoUrl = welcomePhotoUrl(config);
+      if (photoUrl) photoCandidates.push({ kind: 'url', value: photoUrl });
+      if (hasWelcomePhoto()) photoCandidates.push({ kind: 'file', value: { source: WELCOME_PHOTO_PATH } });
+
+      if (photoCandidates.length) {
+        const caption = text.length <= CAPTION_LIMIT ? text : '✨ <b>Добро пожаловать в CALORIA!</b>';
+        for (const candidate of photoCandidates) {
+          try {
+            await ctx.replyWithPhoto(candidate.value, { caption, ...extra });
+            noteWelcomePhotoSuccess();
+            if (caption !== text) await ctx.reply(text, extra);
+            return;
+          } catch (error) {
+            noteWelcomePhotoError(error.message);
+            logger.warn('Welcome photo attempt failed', {
+              source: candidate.kind,
+              reason: error.message,
+            });
+          }
         }
       }
 

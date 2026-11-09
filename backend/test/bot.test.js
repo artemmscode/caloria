@@ -90,7 +90,7 @@ test('bot /start creates a user and returns the Mini App button', async (t) => {
   assert.ok(reply.payload.caption.length <= 1024, 'caption must fit the Telegram limit');
   assert.match(JSON.stringify(reply.payload.reply_markup), /web_app/);
   assert.match(JSON.stringify(reply.payload.reply_markup), /example\.github\.io/);
-  assert.match(JSON.stringify(reply.payload.photo), /caloria-welcome/);
+  assert.match(String(reply.payload.photo), /assets\/caloria-welcome\.jpg$/);
   assert.equal(calls.filter((call) => call.method === 'sendMessage').length, 0);
 
   const user = await repository.getUserByTelegramId(String(from.id));
@@ -138,7 +138,7 @@ test('bot /start falls back to text when the welcome photo fails', async (t) => 
     },
   });
 
-  assert.equal(calls.filter((call) => call.method === 'sendPhoto').length, 1);
+  assert.equal(calls.filter((call) => call.method === 'sendPhoto').length, 2);
   const fallback = calls.filter((call) => call.method === 'sendMessage').at(-1);
   assert.ok(fallback, 'text fallback expected');
   assert.match(fallback.payload.text, /Добро пожаловать/);
