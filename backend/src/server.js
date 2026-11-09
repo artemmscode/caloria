@@ -4,6 +4,7 @@ import { createRepository } from './database/index.js';
 import { createApp } from './app.js';
 import { createBot, configureBotProfile } from './bot.js';
 import { startScheduler } from './services/reminder.service.js';
+import { startDevPolling } from './utils/devPolling.js';
 import { logger } from './utils/logger.js';
 
 async function main() {
@@ -24,10 +25,7 @@ async function main() {
     } else if (!config.isProduction) {
       // Telegraf's launch() resolves only when polling stops, so it must not be
       // awaited here: the HTTP server still has to start in parallel.
-      bot.launch({ dropPendingUpdates: false }).catch((error) => {
-        logger.error('Telegram polling stopped', { reason: error.message });
-      });
-      logger.info('Telegram bot starting in polling mode (development)');
+      await startDevPolling(bot);
     } else {
       logger.error('WEBHOOK_URL is required in production; bot not started');
     }
