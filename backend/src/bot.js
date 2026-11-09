@@ -11,8 +11,21 @@ import { getDashboard } from './services/stats.service.js';
 const escapeHtml = (value = '') =>
   String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const openAppButton = (config) =>
-  Markup.inlineKeyboard([[Markup.button.webApp('ОТКРЫТЬ CALORIA', config.miniAppUrl)]]);
+const isSecureUrl = (value) => /^https:\/\//i.test(String(value || ''));
+
+/**
+ * Telegram accepts web_app buttons only over HTTPS. During local development the
+ * Mini App runs on http://localhost, so the same button degrades to a plain URL
+ * button instead of making /start fail with a Telegram validation error.
+ */
+const appButton = (config, text = 'ОТКРЫТЬ CALORIA', suffix = '') => {
+  const url = `${config.miniAppUrl}${suffix}`;
+  return isSecureUrl(config.miniAppUrl)
+    ? Markup.button.webApp(text, url)
+    : Markup.button.url(text, url);
+};
+
+const openAppButton = (config) => Markup.inlineKeyboard([[appButton(config)]]);
 
 const timeEditing = new Map();
 
@@ -82,7 +95,7 @@ function settingsKeyboard(settings, config) {
     [Markup.button.callback(`🍽️ Ужин · ${settings.dinnerTime}`, 'settime:dinner')],
     [Markup.button.callback(`🌙 Вечер · ${settings.eveningTime}`, 'settime:evening')],
     [Markup.button.callback(`💧 Вода: ${state(settings.waterEnabled)}`, 'toggle:water')],
-    [Markup.button.webApp('ОТКРЫТЬ НАСТРОЙКИ В ПРИЛОЖЕНИИ', `${config.miniAppUrl}#profile`)],
+    [appButton(config, 'ОТКРЫТЬ НАСТРОЙКИ В ПРИЛОЖЕНИИ', '#profile')],
   ]);
 }
 
@@ -357,7 +370,7 @@ export function createBot({ config, repository }) {
           parse_mode: 'HTML',
           ...Markup.inlineKeyboard([
             [Markup.button.callback('Сводка за день', 'today')],
-            [Markup.button.webApp('ОТКРЫТЬ CALORIA', config.miniAppUrl)],
+            [appButton(config)],
           ]),
         },
       );
@@ -386,7 +399,7 @@ export function createBot({ config, repository }) {
         `Записей: ${diary.entries.length}`,
       {
         parse_mode: 'HTML',
-        ...Markup.inlineKeyboard([[Markup.button.webApp('ОТКРЫТЬ CALORIA', config.miniAppUrl)]]),
+        ...Markup.inlineKeyboard([[appButton(config)]]),
       },
     );
   });
@@ -434,7 +447,7 @@ async function sendConfirmation(ctx, repository, config, user, parsed, source, n
           Markup.button.callback('✅ Добавить', `confirm:${pending.id}`),
           Markup.button.callback('Отменить', `cancel:${pending.id}`),
         ],
-        [Markup.button.webApp('ОТКРЫТЬ CALORIA', config.miniAppUrl)],
+        [appButton(config)],
       ]),
     },
   );

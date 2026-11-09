@@ -18,10 +18,10 @@ const BOT_INFO = {
  * Builds a bot whose Telegram API is stubbed. Telegraf creates a new Telegram
  * client for every update context, so the stub is installed on the prototype.
  */
-async function setupBot() {
+async function setupBot({ miniAppUrl = 'https://example.github.io/caloria/' } = {}) {
   const config = buildTestConfig({
     BOT_TOKEN: '123456:test-token',
-    MINI_APP_URL: 'https://example.github.io/caloria/',
+    MINI_APP_URL: miniAppUrl,
   });
   const repository = new MemoryRepository();
   await repository.init();
@@ -84,6 +84,29 @@ test('bot /start creates a user and returns the Mini App button', async (t) => {
   const user = await repository.getUserByTelegramId(String(from.id));
   assert.ok(user, 'user should be created on /start');
   assert.equal(user.firstName, 'Кирилл');
+});
+
+test('http Mini App URL degrades to a plain URL button instead of failing', async (t) => {
+  const { bot, calls, restore } = await setupBot({ miniAppUrl: 'http://localhost:5500/' });
+  t.after(restore);
+
+  await bot.handleUpdate({
+    update_id: 9,
+    message: {
+      message_id: 9,
+      from,
+      chat,
+      date: now,
+      text: '/start',
+      entities: [{ type: 'bot_command', offset: 0, length: 6 }],
+    },
+  });
+
+  const reply = calls.at(-1);
+  assert.equal(reply.method, 'sendMessage');
+  const markup = JSON.stringify(reply.payload.reply_markup);
+  assert.match(markup, /localhost:5500/);
+  assert.doesNotMatch(markup, /web_app/);
 });
 
 test('bot food message requires confirmation before saving', async (t) => {
