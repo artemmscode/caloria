@@ -7,6 +7,7 @@ node_modules/
 .env.*
 !.env.example
 !**/.env.example
+backend/.env.production.local
 
 # Local development data (JSON fallback store)
 .dev-data/
