@@ -1,0 +1,313 @@
+/* ==========================================================================
+   CALORIA — responsive, accessibility and motion preferences
+   ========================================================================== */
+
+/* Compact phones --------------------------------------------------------- */
+
+@media (max-width: 380px) {
+  :root {
+    --page-pad: 14px;
+    --topbar-h: 56px;
+    --nav-h: 66px;
+  }
+
+  body {
+    font-size: 15px;
+  }
+
+  .screen-title {
+    font-size: 27px;
+  }
+
+  .calorie-ring {
+    width: min(72vw, 260px);
+  }
+
+  .calorie-ring__value {
+    font-size: 40px;
+  }
+
+  .macro-grid {
+    gap: 6px;
+  }
+
+  .macro-card {
+    padding: 11px 9px 10px;
+  }
+
+  .macro-card__value strong {
+    font-size: 16px;
+  }
+
+  .macro-card__label {
+    font-size: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-card__value {
+    font-size: 22px;
+  }
+
+  .nav-item__label {
+    font-size: 9.5px;
+  }
+
+  .nav-item__icon {
+    width: 34px;
+    height: 28px;
+  }
+
+  .week-chart {
+    gap: 4px;
+    height: 104px;
+  }
+
+  .sheet__header,
+  .sheet__body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid--2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Very narrow / small height --------------------------------------------- */
+
+@media (max-width: 340px) {
+  .macro-card__label {
+    letter-spacing: -0.01em;
+  }
+
+  .macro-card__value span {
+    display: none;
+  }
+
+  .option-grid--3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .segmented__item {
+    padding: 0 8px;
+    font-size: 11.5px;
+  }
+}
+
+/* Landscape phones ------------------------------------------------------- */
+
+@media (max-height: 480px) and (orientation: landscape) {
+  :root {
+    --topbar-h: 48px;
+    --nav-h: 54px;
+  }
+
+  .view {
+    padding-top: calc(var(--topbar-h) + var(--safe-top) + 8px);
+  }
+
+  .bottom-nav {
+    padding-top: 4px;
+    padding-bottom: calc(4px + var(--safe-bottom));
+  }
+
+  .nav-item {
+    min-height: 42px;
+    gap: 0;
+  }
+
+  .nav-item__label {
+    display: none;
+  }
+
+  .nav-item__icon {
+    height: 38px;
+  }
+
+  .calorie-ring {
+    width: 210px;
+  }
+
+  .splash__mark,
+  .splash__mark svg {
+    width: 64px;
+    height: 64px;
+  }
+
+  .welcome {
+    min-height: auto;
+  }
+
+  .onboarding__inner {
+    padding-top: calc(14px + var(--safe-top));
+  }
+}
+
+/* Tablets and desktop ---------------------------------------------------- */
+
+@media (min-width: 700px) {
+  body {
+    padding: 0;
+  }
+
+  .topbar {
+    position: fixed;
+    top: 17px;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 17px;
+  }
+
+  .view {
+    padding-top: calc(var(--topbar-h) + var(--safe-top) + 30px);
+  }
+
+  .fab {
+    right: max(24px, calc(50vw - var(--page-max) / 2 + 24px));
+    bottom: calc(var(--nav-h) + 36px);
+  }
+
+  .toast-root {
+    bottom: 96px;
+  }
+
+  .calorie-ring {
+    width: 300px;
+  }
+
+  .onboarding__inner {
+    padding-top: 42px;
+    padding-bottom: 42px;
+  }
+}
+
+@media (min-width: 1100px) {
+  :root {
+    --page-max: 600px;
+  }
+}
+
+/* Safe areas ------------------------------------------------------------- */
+
+@supports (padding: max(0px)) {
+  .topbar {
+    padding-top: max(var(--safe-top), env(safe-area-inset-top, 0px));
+    height: calc(var(--topbar-h) + max(var(--safe-top), env(safe-area-inset-top, 0px)));
+  }
+
+  .bottom-nav {
+    padding-bottom: max(8px, calc(8px + env(safe-area-inset-bottom, 0px)));
+  }
+
+  .sheet__body {
+    padding-bottom: max(24px, calc(24px + env(safe-area-inset-bottom, 0px)));
+  }
+
+  .onboarding__inner {
+    padding-bottom: max(24px, calc(24px + env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+/* Hover-capable pointers ------------------------------------------------- */
+
+@media (hover: hover) and (pointer: fine) {
+  .meal-card:hover,
+  .stat-card:hover,
+  .macro-card:hover {
+    border-color: var(--border-strong);
+  }
+
+  .food-row:hover {
+    background: var(--surface-strong);
+  }
+
+  .settings-row:hover .settings-row__chevron {
+    color: var(--text);
+    transform: translateX(2px);
+  }
+
+  .settings-row__chevron {
+    transition: color var(--dur-fast), transform var(--dur-fast) var(--ease);
+  }
+
+  .btn--primary:hover {
+    background: linear-gradient(135deg, #e2ff9c, #c4f862);
+  }
+
+  .btn--secondary:hover {
+    background: var(--surface-solid-2);
+  }
+}
+
+/* Reduced motion --------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ambient__glow {
+    animation: none;
+  }
+}
+
+/* High contrast / Windows forced colors --------------------------------- */
+
+@media (forced-colors: active) {
+  .btn,
+  .card,
+  .input,
+  .select,
+  .sheet,
+  .dialog,
+  .meal-card,
+  .stat-card,
+  .macro-card {
+    border: 1px solid ButtonText;
+  }
+
+  .nav-item.is-active .nav-item__icon {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* Print ------------------------------------------------------------------ */
+
+@media print {
+  .ambient,
+  .topbar,
+  .bottom-nav,
+  .fab,
+  .toast-root,
+  .splash {
+    display: none !important;
+  }
+
+  .view {
+    padding: 0;
+  }
+
+  body,
+  .app {
+    background: #fff;
+    color: #000;
+  }
+}

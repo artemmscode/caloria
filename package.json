@@ -1,0 +1,16 @@
+{
+  "name": "caloria",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CALORIA — Telegram Mini App, REST API and reminder bot",
+  "scripts": {
+    "dev:api": "npm --prefix backend run dev",
+    "dev:web": "node scripts/serve-frontend.mjs",
+    "test": "npm --prefix backend test && npm --prefix frontend test",
+    "check": "node scripts/check-syntax.mjs",
+    "prepare:pages": "node scripts/prepare-pages.mjs"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,65 @@
+# Render Blueprint for the CALORIA backend, REST API and Telegram bot.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Secrets are marked `sync: false`: Render asks for them in the dashboard and
+# never stores them in the repository. See README.md for where to get each key.
+
+services:
+  - type: web
+    name: caloria-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SCHEDULER_ENABLED
+        value: true
+      - key: DEFAULT_TIMEZONE
+        value: Europe/Moscow
+
+      # Telegram — get the token from @BotFather.
+      - key: BOT_TOKEN
+        sync: false
+      # Random string (openssl rand -hex 32); only A-Z a-z 0-9 _ - are allowed
+      # by Telegram for the webhook secret header.
+      - key: WEBHOOK_SECRET
+        sync: false
+      # Optional: the public URL of this Render service. If empty, the backend
+      # uses RENDER_EXTERNAL_URL automatically.
+      - key: WEBHOOK_URL
+        sync: false
+      # GitHub Pages URL of the Mini App, WITH a trailing slash:
+      # https://<github-user>.github.io/<repository>/
+      - key: MINI_APP_URL
+        sync: false
+
+      # Session signing key (openssl rand -hex 48).
+      - key: JWT_SECRET
+        sync: false
+      # Protects POST /api/cron/tick (openssl rand -hex 32). Optional, but
+      # recommended for keeping reminders alive on the free plan.
+      - key: CRON_SECRET
+        sync: false
+      # Comma-separated browser origins. Include https://<github-user>.github.io
+      - key: CORS_ORIGINS
+        sync: false
+
+      # Supabase → Project Settings → API.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # Optional integrations.
+      - key: FOOD_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_VISION_MODEL
+        value: gpt-4o-mini

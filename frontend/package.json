@@ -1,0 +1,11 @@
+{
+  "name": "caloria-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CALORIA — static Telegram Mini App (GitHub Pages)",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node ../scripts/check-syntax.mjs js config.js"
+  }
+}

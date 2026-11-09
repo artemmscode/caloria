@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+    <meta name="theme-color" content="#08090B" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="description" content="CALORIA — спокойный дневник питания: калории, БЖУ, вода, вес и мягкие напоминания." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>CALORIA — дневник питания</title>
+
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="assets/icon-180.svg" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+
+    <script src="assets/vendor/lucide.min.js" defer></script>
+    <script src="assets/vendor/chart.umd.min.js" defer></script>
+    <script src="config.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body>
+    <div class="ambient" aria-hidden="true">
+      <span class="ambient__glow ambient__glow--one"></span>
+      <span class="ambient__glow ambient__glow--two"></span>
+      <span class="ambient__grain"></span>
+    </div>
+
+    <div id="splash" class="splash" aria-label="Загрузка CALORIA">
+      <div class="splash__inner">
+        <div class="splash__mark">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="25" class="splash__track" />
+            <circle cx="32" cy="32" r="25" class="splash__arc" />
+            <circle cx="32" cy="32" r="4" class="splash__dot" />
+          </svg>
+        </div>
+        <p class="splash__word">CALORIA</p>
+        <p class="splash__hint">настраиваем ваш день</p>
+      </div>
+    </div>
+
+    <div id="boot-error" class="boot-error" hidden>
+      <div class="boot-error__card">
+        <div class="boot-error__icon"><i data-lucide="unplug"></i></div>
+        <h1>Не удалось запустить CALORIA</h1>
+        <p id="boot-error-text">Проверьте соединение и откройте приложение ещё раз.</p>
+        <button type="button" class="btn btn--primary" id="boot-retry">Попробовать снова</button>
+        <p class="boot-error__hint">Открыть приложение можно через Telegram-бота <strong id="boot-bot-username">проекта</strong></p>
+      </div>
+    </div>
+
+    <div id="app" class="app" hidden>
+      <header class="topbar">
+        <a class="brand" href="#home" data-nav="home" aria-label="CALORIA, на главную">
+          <img src="assets/logo-mark.svg" alt="" width="24" height="24" />
+          <span>CALORIA</span>
+        </a>
+        <div class="topbar__actions">
+          <button type="button" class="icon-btn" id="theme-toggle" aria-label="Переключить тему">
+            <i data-lucide="moon-star"></i>
+          </button>
+          <button type="button" class="topbar__avatar" id="topbar-avatar" aria-label="Открыть профиль"></button>
+        </div>
+      </header>
+
+      <div id="offline-banner" class="offline-banner" hidden>
+        <i data-lucide="wifi-off"></i>
+        <span>Нет соединения. Показываем последние загруженные данные.</span>
+      </div>
+
+      <main id="view" class="view" tabindex="-1"></main>
+
+      <nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация">
+        <button type="button" class="nav-item is-active" data-nav="home" aria-label="Главная">
+          <span class="nav-item__icon"><i data-lucide="house"></i></span>
+          <span class="nav-item__label">Главная</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="diary" aria-label="Дневник">
+          <span class="nav-item__icon"><i data-lucide="notebook-pen"></i></span>
+          <span class="nav-item__label">Дневник</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="statistics" aria-label="Статистика">
+          <span class="nav-item__icon"><i data-lucide="chart-no-axes-combined"></i></span>
+          <span class="nav-item__label">Статистика</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="progress" aria-label="Прогресс">
+          <span class="nav-item__icon"><i data-lucide="trending-up"></i></span>
+          <span class="nav-item__label">Прогресс</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="profile" aria-label="Профиль">
+          <span class="nav-item__icon"><i data-lucide="user-round"></i></span>
+          <span class="nav-item__label">Профиль</span>
+        </button>
+      </nav>
+    </div>
+
+    <div id="onboarding"></div>
+    <div id="overlay-root"></div>
+    <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="false"></div>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

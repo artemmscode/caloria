@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Local development data (JSON fallback store)
+.dev-data/
+backend/.dev-data/
+
+# Build output
+dist/
+_site/
+coverage/
+
+# QA / screenshots / temporary files
+qa-*.png
+qa/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
