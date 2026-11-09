@@ -1,4 +1,5 @@
 import { asyncHandler } from '../utils/errors.js';
+import { hasWelcomePhoto } from '../utils/welcomePhoto.js';
 
 export function createHealthController({ repository, config, bot, scheduler }) {
   return {
@@ -18,6 +19,8 @@ export function createHealthController({ repository, config, bot, scheduler }) {
           database,
           bot: Boolean(bot),
           scheduler: Boolean(scheduler),
+          welcomePhoto: hasWelcomePhoto(),
+          commit: (process.env.RENDER_GIT_COMMIT || '').slice(0, 7) || null,
           environment: config.nodeEnv,
           uptimeSeconds: Math.round(process.uptime()),
           timestamp: new Date().toISOString(),
