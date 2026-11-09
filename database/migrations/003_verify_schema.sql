@@ -16,8 +16,11 @@ do $$
 declare
   missing_list text;
 begin
-  with expected(table_name, column_name) as (
-    values
+  select string_agg(m.table_name || '.' || m.column_name, ', ' order by m.table_name, m.column_name)
+    into missing_list
+  from (
+    select e.table_name, e.column_name
+    from (values
       ('users', 'id'),
       ('users', 'telegram_id'),
       ('users', 'username'),
@@ -154,19 +157,13 @@ begin
       ('bot_pending_entries', 'payload'),
       ('bot_pending_entries', 'expires_at'),
       ('bot_pending_entries', 'created_at')
-  ),
-  missing as (
-    select e.table_name, e.column_name
-    from expected e
+    ) as e(table_name, column_name)
     left join information_schema.columns c
       on c.table_schema = 'public'
      and c.table_name = e.table_name
      and c.column_name = e.column_name
     where c.column_name is null
-  )
-  select string_agg(m.table_name || '.' || m.column_name, ', ' order by m.table_name, m.column_name)
-    into missing_list
-  from missing m;
+  ) m;
 
   if missing_list is not null then
     raise exception
