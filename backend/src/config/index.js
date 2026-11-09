@@ -90,7 +90,7 @@ export function createConfig(env = process.env) {
     openaiVisionModel: env.OPENAI_VISION_MODEL || 'gpt-4o-mini',
     enableDevAuth: !isProduction && bool(env.ENABLE_DEV_AUTH, nodeEnv !== 'test'),
     devDataDir: env.DEV_DATA_DIR || './.dev-data',
-    defaultTimezone: env.DEFAULT_TIMEZONE || 'Europe/Moscow',
+    defaultTimezone: env.DEFAULT_TIMEZONE || 'Asia/Omsk',
     schedulerEnabled: bool(env.SCHEDULER_ENABLED, true),
     hasSupabase: Boolean(env.SUPABASE_URL && supabaseSecretKey),
   };

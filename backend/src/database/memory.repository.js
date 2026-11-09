@@ -8,7 +8,7 @@ import { notFound } from '../utils/errors.js';
 const nowIso = () => new Date().toISOString();
 const id = (prefix) => `${prefix}_${crypto.randomUUID()}`;
 
-export function defaultReminderSettings(userId, timezone = 'Europe/Moscow') {
+export function defaultReminderSettings(userId, timezone = 'Asia/Omsk') {
   return {
     id: id('rem'),
     userId,
@@ -155,7 +155,7 @@ export class MemoryRepository {
       sex: null,
       activityLevel: null,
       goal: null,
-      timezone: data.timezone || 'Europe/Moscow',
+      timezone: data.timezone || 'Asia/Omsk',
       onboardingCompleted: false,
       createdAt: nowIso(),
       updatedAt: nowIso(),

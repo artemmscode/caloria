@@ -21,7 +21,7 @@ services:
       - key: SCHEDULER_ENABLED
         value: true
       - key: DEFAULT_TIMEZONE
-        value: Europe/Moscow
+        value: Asia/Omsk
 
       # Telegram — get the token from @BotFather.
       - key: BOT_TOKEN

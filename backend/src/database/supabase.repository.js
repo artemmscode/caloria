@@ -22,7 +22,7 @@ function mapUser(row) {
     sex: row.sex,
     activityLevel: row.activity_level,
     goal: row.goal,
-    timezone: row.timezone || 'Europe/Moscow',
+    timezone: row.timezone || 'Asia/Omsk',
     onboardingCompleted: Boolean(row.onboarding_completed),
     createdAt: row.created_at,
   };
@@ -110,7 +110,7 @@ function mapPhoto(row) {
   };
 }
 
-function mapReminder(row, fallbackUserId, fallbackTimezone = 'Europe/Moscow') {
+function mapReminder(row, fallbackUserId, fallbackTimezone = 'Asia/Omsk') {
   if (!row) return defaultReminderSettings(fallbackUserId, fallbackTimezone);
   return {
     id: row.id,
@@ -248,7 +248,7 @@ export class SupabaseRepository {
         first_name: data.firstName || null,
         last_name: data.lastName || null,
         photo_url: data.photoUrl || null,
-        timezone: data.timezone || 'Europe/Moscow',
+        timezone: data.timezone || 'Asia/Omsk',
       })
       .select('*')
       .single();

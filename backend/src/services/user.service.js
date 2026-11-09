@@ -93,7 +93,7 @@ export async function saveProfile(repository, userId, input) {
     ...current,
     ...Object.fromEntries(Object.entries(input).filter(([, value]) => value !== undefined)),
   };
-  if (merged.timezone) merged.timezone = safeTimezone(merged.timezone, current.timezone || 'Europe/Moscow');
+  if (merged.timezone) merged.timezone = safeTimezone(merged.timezone, current.timezone || 'Asia/Omsk');
 
   const missing = CORE_FIELDS.filter((field) => merged[field] == null);
   if (missing.length) {

@@ -66,7 +66,7 @@ export function verifyTelegramInitData(initData, botToken, maxAgeSeconds = 86400
     isPremium: Boolean(payload.is_premium),
     allowsWriteToPm: Boolean(payload.allows_write_to_pm),
     authDate,
-    timezone: safeTimezone(params.get('tz') || payload?.timezone, 'Europe/Moscow'),
+    timezone: safeTimezone(params.get('tz') || payload?.timezone, 'Asia/Omsk'),
   };
 }
 

@@ -63,7 +63,7 @@ export async function updateReminders(repository, user, patch) {
 }
 
 export function dueReminders(settings, now = new Date(), catchUpMinutes = 2) {
-  const timezone = settings.timezone || 'Europe/Moscow';
+  const timezone = settings.timezone || 'Asia/Omsk';
   const date = localDate(now, timezone);
   const time = localTime(now, timezone);
   const nowMinutes = minutesFromTime(time);

@@ -145,13 +145,14 @@ export function uid(prefix = 'id') {
 
 export function localTimezone() {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Moscow';
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Omsk';
   } catch {
-    return 'Europe/Moscow';
+    return 'Asia/Omsk';
   }
 }
 
 export const TIMEZONES = [
+  'Asia/Omsk',
   'Europe/Moscow',
   'Europe/Kaliningrad',
   'Europe/Samara',

@@ -84,6 +84,7 @@ test('bot /start creates a user and returns the Mini App button', async (t) => {
   const user = await repository.getUserByTelegramId(String(from.id));
   assert.ok(user, 'user should be created on /start');
   assert.equal(user.firstName, 'Кирилл');
+  assert.equal(user.timezone, 'Asia/Omsk');
 });
 
 test('http Mini App URL degrades to a plain URL button instead of failing', async (t) => {

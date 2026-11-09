@@ -17,6 +17,7 @@ test('production config accepts a new sb_secret_ Supabase key', () => {
   assert.equal(config.supabaseServiceRoleKey, 'sb_secret_example');
   assert.equal(config.hasSupabase, true);
   assert.equal(config.webhookUrl, 'https://caloria-api.onrender.com');
+  assert.equal(config.defaultTimezone, 'Asia/Omsk');
 });
 
 test('production config still accepts a legacy service_role key', () => {

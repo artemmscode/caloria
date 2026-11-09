@@ -1,6 +1,7 @@
 -- ============================================================================
 -- CALORIA — full database setup for Supabase SQL Editor.
 -- Generated from database/migrations/*.sql. Run this file once.
+-- Default timezone: Asia/Omsk (UTC+6).
 -- Safe to re-run: tables/indexes use IF NOT EXISTS and seeds use ON CONFLICT.
 -- ============================================================================
 
@@ -36,7 +37,7 @@ create table if not exists public.users (
     activity_level is null or activity_level in ('sedentary','light','moderate','active','very_active')
   ),
   goal text check (goal is null or goal in ('lose','maintain','gain')),
-  timezone text not null default 'Europe/Moscow',
+  timezone text not null default 'Asia/Omsk',
   onboarding_completed boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -198,7 +199,7 @@ create table if not exists public.reminder_settings (
   quiet_start time not null default '22:00',
   quiet_end time not null default '08:00',
   water_interval_hours integer not null default 3 check (water_interval_hours between 1 and 12),
-  timezone text not null default 'Europe/Moscow',
+  timezone text not null default 'Asia/Omsk',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -311,7 +312,7 @@ set search_path = public
 as $$
 begin
   insert into public.reminder_settings (user_id, timezone)
-  values (new.id, coalesce(new.timezone, 'Europe/Moscow'))
+  values (new.id, coalesce(new.timezone, 'Asia/Omsk'))
   on conflict (user_id) do nothing;
   return new;
 end;
@@ -660,4 +661,28 @@ begin
   end if;
 
   raise notice 'CALORIA schema check passed: all required tables and columns exist.';
+end $$;
+
+
+-- ----------------------------------------------------------------------------
+-- 004_default_timezone_omsk.sql
+-- ----------------------------------------------------------------------------
+
+-- ============================================================================
+-- CALORIA — default timezone: Asia/Omsk (UTC+6)
+--
+-- Run this if the database was created before the default timezone changed.
+-- It only changes defaults for FUTURE rows; existing user preferences are kept.
+-- Safe to re-run.
+-- ============================================================================
+
+alter table public.users
+  alter column timezone set default 'Asia/Omsk';
+
+alter table public.reminder_settings
+  alter column timezone set default 'Asia/Omsk';
+
+do $$
+begin
+  raise notice 'CALORIA default timezone is now Asia/Omsk.';
 end $$;

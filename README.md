@@ -127,11 +127,12 @@ caloria/
 │   ├── package.json
 │   └── .env.example
 ├── database/
-│   ├── setup_all.sql         # 001 + 002 + 003 одним файлом для SQL Editor
+│   ├── setup_all.sql         # 001–004 одним файлом для SQL Editor
 │   └── migrations/
 │       ├── 001_init.sql          # таблицы, индексы, RLS, триггеры
 │       ├── 002_seed_foods.sql    # проверенная база продуктов
-│       └── 003_verify_schema.sql # проверка совместимости при переиспользовании проекта
+│       ├── 003_verify_schema.sql # проверка совместимости при переиспользовании проекта
+│       └── 004_default_timezone_omsk.sql # часовой пояс по умолчанию Asia/Omsk
 ├── scripts/                  # serve-frontend, prepare-pages, check-syntax
 ├── .github/workflows/deploy.yml
 ├── render.yaml
@@ -229,7 +230,7 @@ API_BASE_URL=https://example.onrender.com BOT_USERNAME=my_caloria_bot npm run pr
 | `NODE_ENV` | да | — | `production` |
 | `PORT` | нет | Render задаёт сам | `3000` |
 | `SCHEDULER_ENABLED` | нет | — | `true` |
-| `DEFAULT_TIMEZONE` | нет | IANA timezone | `Europe/Moscow` |
+| `DEFAULT_TIMEZONE` | нет | IANA timezone для новых пользователей бота | `Asia/Omsk` |
 | `AUTH_MAX_AGE_SECONDS` | нет | максимальный возраст `initData` | `86400` |
 | `FOOD_API_KEY` | нет | USDA FoodData Central API key | `...` |
 | `OPENAI_API_KEY` | нет | ключ OpenAI-совместимого API | `sk-...` |
@@ -253,7 +254,7 @@ Frontend не использует Supabase напрямую и не храни�
 1. Зарегистрируйтесь на <https://supabase.com> и создайте проект (Free tier достаточно).
 2. Сохраните пароль базы данных в надёжном месте.
 3. Откройте **SQL Editor**.
-4. Самый быстрый способ — выполнить один файл `database/setup_all.sql`: он объединяет `001_init.sql`, `002_seed_foods.sql` и `003_verify_schema.sql`. Если предпочитаете по шагам, выполните эти три файла по очереди.
+4. Самый быстрый способ — выполнить один файл `database/setup_all.sql`: он объединяет `001_init.sql`, `002_seed_foods.sql`, `003_verify_schema.sql` и `004_default_timezone_omsk.sql`. Если предпочитаете по шагам, выполните эти четыре файла по очереди.
 5. Проверьте **Table Editor**: должны появиться `users`, `food_products`, `food_entries`, `weight_history`, `body_measurements`, `progress_photos`, `user_goals`, `reminder_settings`, `notification_logs`, `water_logs`, `favorites`, `bot_pending_entries`.
 6. Проверьте **Authentication → Policies** или SQL: RLS включён на всех таблицах.
 7. Скопируйте из **Project Settings → API**:
@@ -400,7 +401,7 @@ Blueprint создаёт **новый** сервис `caloria-api` и не из�
 
 ### Supabase
 
-1. Если проект **выделен только под CALORIA** — выполните `database/setup_all.sql` (или три миграции по очереди).
+1. Если проект **выделен только под CALORIA** — выполните `database/setup_all.sql` (или четыре миграции по очереди).
 2. Если проект **общий с другим приложением**, сначала проверьте конфликты. `create table if not exists` не меняет уже существующие таблицы, а `public.users` — очень распространённое имя. Третий скрипт (`003_verify_schema.sql`) специально завершится ошибкой со списком отсутствующих колонок.
 3. При конфликте безопаснее создать отдельный Supabase-проект: это бесплатно и занимает пару минут. Не удаляйте таблицы чужого приложения.
 4. Возьмите **Project URL** и **Secret key** (`sb_secret_...`) из Settings → API Keys и добавьте их в Render как `SUPABASE_URL` и `SUPABASE_SECRET_KEY`. В frontend эти значения не нужны.

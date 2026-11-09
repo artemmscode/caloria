@@ -57,7 +57,7 @@ export function calculatePlan(profile) {
     activityLevel = 'moderate',
     goal = 'maintain',
     targetWeight = null,
-    timezone = 'Europe/Moscow',
+    timezone = 'Asia/Omsk',
   } = profile;
 
   const warnings = [];

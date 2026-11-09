@@ -12,7 +12,7 @@ export function isValidTimeZone(timeZone) {
   }
 }
 
-export function safeTimezone(timeZone, fallback = 'Europe/Moscow') {
+export function safeTimezone(timeZone, fallback = 'Asia/Omsk') {
   return isValidTimeZone(timeZone) ? timeZone : fallback;
 }
 
