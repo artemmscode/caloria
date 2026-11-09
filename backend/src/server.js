@@ -22,8 +22,12 @@ async function main() {
       });
       logger.info('Telegram webhook registered', { url: `${config.webhookUrl}/telegram/webhook` });
     } else if (!config.isProduction) {
-      await bot.launch({ dropPendingUpdates: false });
-      logger.info('Telegram bot started in polling mode (development)');
+      // Telegraf's launch() resolves only when polling stops, so it must not be
+      // awaited here: the HTTP server still has to start in parallel.
+      bot.launch({ dropPendingUpdates: false }).catch((error) => {
+        logger.error('Telegram polling stopped', { reason: error.message });
+      });
+      logger.info('Telegram bot starting in polling mode (development)');
     } else {
       logger.error('WEBHOOK_URL is required in production; bot not started');
     }
