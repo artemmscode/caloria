@@ -1,5 +1,5 @@
 import { asyncHandler } from '../utils/errors.js';
-import { hasWelcomePhoto } from '../utils/welcomePhoto.js';
+import { getWelcomePhotoStatus } from '../utils/welcomePhoto.js';
 
 export function createHealthController({ repository, config, bot, scheduler }) {
   return {
@@ -12,6 +12,7 @@ export function createHealthController({ repository, config, bot, scheduler }) {
         database = 'unavailable';
       }
       const ok = database === 'ok';
+      const photo = getWelcomePhotoStatus();
       res.status(ok ? 200 : 503).json({
         ok,
         data: {
@@ -19,7 +20,11 @@ export function createHealthController({ repository, config, bot, scheduler }) {
           database,
           bot: Boolean(bot),
           scheduler: Boolean(scheduler),
-          welcomePhoto: hasWelcomePhoto(),
+          welcomePhoto: photo.exists,
+          welcomePhotoBytes: photo.bytes,
+          welcomePhotoError: photo.lastError,
+          welcomePhotoErrorAt: photo.lastErrorAt,
+          welcomePhotoSuccessAt: photo.lastSuccessAt,
           commit: (process.env.RENDER_GIT_COMMIT || '').slice(0, 7) || null,
           environment: config.nodeEnv,
           uptimeSeconds: Math.round(process.uptime()),

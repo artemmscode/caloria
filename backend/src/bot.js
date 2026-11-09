@@ -1,6 +1,6 @@
 import { Telegraf, Markup } from 'telegraf';
 import { logger } from './utils/logger.js';
-import { WELCOME_PHOTO_PATH, hasWelcomePhoto } from './utils/welcomePhoto.js';
+import { WELCOME_PHOTO_PATH, hasWelcomePhoto, noteWelcomePhotoError, noteWelcomePhotoSuccess } from './utils/welcomePhoto.js';
 import { calculatePlan } from './services/nutrition.js';
 import { buildDiary, fallbackGoals, getGoalsOrDefault, mealForLocalTime } from './services/diary.service.js';
 import { getReminders, updateReminders } from './services/reminder.service.js';
@@ -141,9 +141,11 @@ export function createBot({ config, repository }) {
         try {
           const caption = text.length <= CAPTION_LIMIT ? text : '✨ <b>Добро пожаловать в CALORIA!</b>';
           await ctx.replyWithPhoto({ source: WELCOME_PHOTO_PATH }, { caption, ...extra });
+          noteWelcomePhotoSuccess();
           if (caption !== text) await ctx.reply(text, extra);
           return;
         } catch (error) {
+          noteWelcomePhotoError(error.message);
           logger.warn('Welcome photo could not be sent, falling back to text', {
             reason: error.message,
           });

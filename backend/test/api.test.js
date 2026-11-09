@@ -187,6 +187,7 @@ test('full API integration: onboarding, diary, stats, weight, water, reminders',
   assert.equal(health.status, 200);
   assert.equal(health.body.data.status, 'healthy');
   assert.equal(health.body.data.welcomePhoto, true);
+  assert.ok(health.body.data.welcomePhotoBytes > 1000);
 
   assert.ok(user.id);
   assert.ok(repository.users.size > 0);
