@@ -73,7 +73,7 @@ CALORIA — это полноценная экосистема из четырё
 - Планировщик напоминаний (node-cron, ежесекундная проверка раз в минуту) + endpoint `/api/cron/tick` для внешнего пинга.
 - Webhook Telegram с секретным заголовком; polling — только в development.
 - Graceful shutdown по SIGTERM/SIGINT.
-- 49 автоматических тестов: API, авторизация, формулы, парсер, сценарии бота, защита webhook, часовые пояса, планировщик.
+- 53 автоматических теста: API, конфигурация, авторизация, формулы, парсер, сценарии бота, защита webhook, часовые пояса, планировщик.
 
 ---
 
@@ -123,12 +123,15 @@ caloria/
 │   │   ├── scheduler/        # зарезервировано под расширение
 │   │   └── utils/
 │   ├── test/                 # node:test
+│   ├── scripts/              # db:check — read-only проверка Supabase
 │   ├── package.json
 │   └── .env.example
-├── database/migrations/
-│   ├── 001_init.sql          # таблицы, индексы, RLS, триггеры
-│   ├── 002_seed_foods.sql    # проверенная база продуктов
-│   └── 003_verify_schema.sql # проверка совместимости при переиспользовании проекта
+├── database/
+│   ├── setup_all.sql         # 001 + 002 + 003 одним файлом для SQL Editor
+│   └── migrations/
+│       ├── 001_init.sql          # таблицы, индексы, RLS, триггеры
+│       ├── 002_seed_foods.sql    # проверенная база продуктов
+│       └── 003_verify_schema.sql # проверка совместимости при переиспользовании проекта
 ├── scripts/                  # serve-frontend, prepare-pages, check-syntax
 ├── .github/workflows/deploy.yml
 ├── render.yaml
@@ -175,7 +178,7 @@ npm run dev:web
 
 ### 4. Подключить Supabase локально (необязательно)
 
-Скопируйте `backend/.env.example` в `backend/.env`, заполните `SUPABASE_URL` и `SUPABASE_SERVICE_ROLE_KEY` — backend автоматически переключится на PostgreSQL.
+Скопируйте `backend/.env.example` в `backend/.env`, заполните `SUPABASE_URL` и `SUPABASE_SECRET_KEY` — backend автоматически переключится на PostgreSQL.
 
 > Никогда не коммитьте `.env`. Он уже в `.gitignore`.
 
@@ -185,7 +188,7 @@ npm run dev:web
 
 ```bash
 # из корня
-npm test          # backend (49 тестов) + frontend (8 тестов)
+npm test          # backend (53 теста) + frontend (8 тестов)
 npm run check     # синтаксис всех JS-файлов
 ```
 
@@ -218,7 +221,8 @@ API_BASE_URL=https://example.onrender.com BOT_USERNAME=my_caloria_bot npm run pr
 | `WEBHOOK_URL` | нет | Render подставляет `RENDER_EXTERNAL_URL`; можно задать вручную | `https://caloria-api.onrender.com` |
 | `MINI_APP_URL` | да | URL GitHub Pages с завершающим `/` | `https://user.github.io/caloria/` |
 | `SUPABASE_URL` | да | Supabase → Project Settings → API → Project URL | `https://abcd.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | да | Supabase → Project Settings → API → `service_role` | `eyJ...` |
+| `SUPABASE_SECRET_KEY` | да | Supabase → Settings → API Keys → Secret key (`sb_secret_...`) | `sb_secret_...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | legacy | Старый JWT `service_role` — альтернатива новому ключу | `eyJ...` |
 | `JWT_SECRET` | да | `openssl rand -hex 48` | длинная строка |
 | `CORS_ORIGINS` | рекомендуется | origin GitHub Pages (без пути) | `https://user.github.io` |
 | `CRON_SECRET` | рекомендуется | `openssl rand -hex 32` | `...` |
@@ -249,19 +253,26 @@ Frontend не использует Supabase напрямую и не храни�
 1. Зарегистрируйтесь на <https://supabase.com> и создайте проект (Free tier достаточно).
 2. Сохраните пароль базы данных в надёжном месте.
 3. Откройте **SQL Editor**.
-4. Выполните по очереди содержимое:
-   - `database/migrations/001_init.sql`
-   - `database/migrations/002_seed_foods.sql`
-   - `database/migrations/003_verify_schema.sql`
+4. Самый быстрый способ — выполнить один файл `database/setup_all.sql`: он объединяет `001_init.sql`, `002_seed_foods.sql` и `003_verify_schema.sql`. Если предпочитаете по шагам, выполните эти три файла по очереди.
 5. Проверьте **Table Editor**: должны появиться `users`, `food_products`, `food_entries`, `weight_history`, `body_measurements`, `progress_photos`, `user_goals`, `reminder_settings`, `notification_logs`, `water_logs`, `favorites`, `bot_pending_entries`.
 6. Проверьте **Authentication → Policies** или SQL: RLS включён на всех таблицах.
 7. Скопируйте из **Project Settings → API**:
    - `Project URL` → `SUPABASE_URL`;
-   - `service_role` secret → `SUPABASE_SERVICE_ROLE_KEY` (только Render, никогда frontend).
+   - Secret key (`sb_secret_...`) → `SUPABASE_SECRET_KEY` (только Render, никогда frontend).
 
 Миграции 001 и 002 идемпотентны: `create table if not exists`, `create index if not exists`. Повторный запуск безопасен. Скрипт 003 — только проверка: он ничего не меняет и завершится ошибкой, если структура не совпадает.
 
-> `service_role` обходит RLS. Он допустим только на сервере. Публичный `anon` key frontend не использует.
+Проверить схему из терминала (read-only):
+
+```bash
+cd backend
+npm run db:check                              # локальный .env
+ENV_FILE=.env.production.local npm run db:check   # production-черновик
+```
+
+Скрипт использует секретный ключ, проверяет все 12 таблиц и колонки и подсказывает, если чего-то не хватает.
+
+> Secret key (и legacy `service_role`) обходит RLS. Он допустим только на сервере. Публичный publishable/`anon` key frontend не использует.
 
 ---
 
@@ -332,26 +343,36 @@ git push -u origin main
 
 Blueprint создаёт **новый** сервис `caloria-api` и не изменяет существующие сервисы (например, `muse-bot`).
 
-1. Зарегистрируйтесь на <https://render.com> и подключите GitHub.
-2. **New → Blueprint** → выберите репозиторий.
-3. Render прочитает `render.yaml` и создаст сервис `caloria-api` (rootDir `backend`).
-4. Заполните секретные переменные (`sync: false`) в дашборде.
-5. Дождитесь статуса **Live** и проверьте `https://<service>.onrender.com/api/health`.
+1. Откройте <https://render.com/deploy?repo=https://github.com/artemmscode/caloria> и войдите через GitHub.
+2. Render прочитает `render.yaml` и создаст **новый** сервис `caloria-api` (rootDir `backend`). Сервис `muse-bot` не затрагивается.
+3. Заполните шесть полей, которые Render попросит (`sync: false`). Готовые значения лежат в `RENDER_VALUES.local.txt` (файл не коммитится):
+
+   | Поле Render | Откуда взять |
+   | --- | --- |
+   | `BOT_TOKEN` | @BotFather → API Token |
+   | `WEBHOOK_SECRET` | `RENDER_VALUES.local.txt` (сгенерирован) |
+   | `JWT_SECRET` | `RENDER_VALUES.local.txt` (сгенерирован) |
+   | `CRON_SECRET` | `RENDER_VALUES.local.txt` (сгенерирован) |
+   | `SUPABASE_URL` | `https://ypnnzsiaketzykvndlzf.supabase.co` |
+   | `SUPABASE_SECRET_KEY` | Supabase → Settings → API Keys → Secret key (`sb_secret_...`) |
+
+   `MINI_APP_URL`, `CORS_ORIGINS`, `NODE_ENV`, `SCHEDULER_ENABLED` и `DEFAULT_TIMEZONE` уже заданы в `render.yaml`.
+4. Дождитесь статуса **Live** и проверьте `https://<service>.onrender.com/api/health`.
 
 ### Вариант B — вручную
 
-- **New → Web Service**, репозиторий, Root Directory `backend`.
+- **New → Web Service**, репозиторий `artemmscode/caloria`, Root Directory `backend`.
 - Runtime: Node.
 - Build Command: `npm ci --omit=dev`.
 - Start Command: `npm start`.
 - Health Check Path: `/api/health`.
-- Добавьте переменные из таблицы выше.
+- Добавьте переменные из таблицы выше. `MINI_APP_URL` и `CORS_ORIGINS` добавьте вручную.
 
 ### После первого деплоя
 
 1. Скопируйте публичный URL Render.
 2. Пропишите его в GitHub Variable `API_BASE_URL`.
-3. В Render задайте `MINI_APP_URL` = URL GitHub Pages с `/` на конце.
+3. `MINI_APP_URL` уже указан в `render.yaml` (`https://artemmscode.github.io/caloria/`); при форке измените его на свой Pages URL.
 4. Перезапустите backend (Manual Deploy → Deploy latest commit), чтобы webhook зарегистрировался с правильным URL.
 5. Перезапустите workflow Pages, чтобы frontend получил актуальный API URL.
 
@@ -379,13 +400,10 @@ Blueprint создаёт **новый** сервис `caloria-api` и не из�
 
 ### Supabase
 
-1. Если проект **выделен только под CALORIA** — просто выполните:
-   - `database/migrations/001_init.sql`
-   - `database/migrations/002_seed_foods.sql`
-   - `database/migrations/003_verify_schema.sql`
+1. Если проект **выделен только под CALORIA** — выполните `database/setup_all.sql` (или три миграции по очереди).
 2. Если проект **общий с другим приложением**, сначала проверьте конфликты. `create table if not exists` не меняет уже существующие таблицы, а `public.users` — очень распространённое имя. Третий скрипт (`003_verify_schema.sql`) специально завершится ошибкой со списком отсутствующих колонок.
 3. При конфликте безопаснее создать отдельный Supabase-проект: это бесплатно и занимает пару минут. Не удаляйте таблицы чужого приложения.
-4. Возьмите **Project URL** и **service_role** key из Project Settings → API и добавьте их в Render. В frontend эти значения не нужны.
+4. Возьмите **Project URL** и **Secret key** (`sb_secret_...`) из Settings → API Keys и добавьте их в Render как `SUPABASE_URL` и `SUPABASE_SECRET_KEY`. В frontend эти значения не нужны.
 
 ### Render
 
@@ -442,7 +460,7 @@ curl -s "https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo"
 
 ## Порядок первого развёртывания
 
-1. Supabase: создать проект → выполнить `001_init.sql` → `002_seed_foods.sql` → `003_verify_schema.sql` → сохранить URL и `service_role`.
+1. Supabase: создать проект → выполнить `database/setup_all.sql` → сохранить URL и Secret key (`sb_secret_...`).
 2. BotFather: создать бота → сохранить токен и username.
 3. Render: создать сервис из `render.yaml` или вручную.
 4. Render: заполнить `BOT_TOKEN`, `WEBHOOK_SECRET`, `JWT_SECRET`, `MINI_APP_URL` (`https://artemmscode.github.io/caloria/`), `SUPABASE_*`, `CORS_ORIGINS` (`https://artemmscode.github.io`).

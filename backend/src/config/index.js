@@ -33,18 +33,22 @@ export function createConfig(env = process.env) {
   const renderUrl = (env.RENDER_EXTERNAL_URL || '').replace(/\/+$/, '');
   const webhookUrl = (env.WEBHOOK_URL || renderUrl).replace(/\/+$/, '');
 
+  // Supabase now issues `sb_secret_...` keys (server-side, bypasses RLS).
+  // Legacy `service_role` JWTs are still supported as a fallback.
+  const supabaseSecretKey = env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY || '';
+
   const requiredInProduction = [
     'BOT_TOKEN',
     'WEBHOOK_SECRET',
     'MINI_APP_URL',
     'SUPABASE_URL',
-    'SUPABASE_SERVICE_ROLE_KEY',
     'JWT_SECRET',
   ];
   if (isProduction) {
     for (const key of requiredInProduction) {
       if (!env[key]) errors.push(key);
     }
+    if (!supabaseSecretKey) errors.push('SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY)');
     if (!webhookUrl) errors.push('WEBHOOK_URL (or RENDER_EXTERNAL_URL)');
   }
 
@@ -80,7 +84,7 @@ export function createConfig(env = process.env) {
     cronSecret: env.CRON_SECRET || '',
     authMaxAgeSeconds: Number(env.AUTH_MAX_AGE_SECONDS || 86400),
     supabaseUrl: env.SUPABASE_URL || '',
-    supabaseServiceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || '',
+    supabaseServiceRoleKey: supabaseSecretKey,
     foodApiKey: env.FOOD_API_KEY || '',
     openaiApiKey: env.OPENAI_API_KEY || '',
     openaiVisionModel: env.OPENAI_VISION_MODEL || 'gpt-4o-mini',
@@ -88,7 +92,7 @@ export function createConfig(env = process.env) {
     devDataDir: env.DEV_DATA_DIR || './.dev-data',
     defaultTimezone: env.DEFAULT_TIMEZONE || 'Europe/Moscow',
     schedulerEnabled: bool(env.SCHEDULER_ENABLED, true),
-    hasSupabase: Boolean(env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY),
+    hasSupabase: Boolean(env.SUPABASE_URL && supabaseSecretKey),
   };
 }
 

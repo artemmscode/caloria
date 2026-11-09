@@ -30,14 +30,14 @@ services:
       # by Telegram for the webhook secret header.
       - key: WEBHOOK_SECRET
         sync: false
-      # Optional: the public URL of this Render service. If empty, the backend
-      # uses RENDER_EXTERNAL_URL automatically.
-      - key: WEBHOOK_URL
-        sync: false
-      # GitHub Pages URL of the Mini App, WITH a trailing slash:
-      # https://<github-user>.github.io/<repository>/
+      # Public URL of this Render service is detected through RENDER_EXTERNAL_URL;
+      # WEBHOOK_URL is optional and only needed for a custom domain.
+      # GitHub Pages URL of the Mini App, WITH a trailing slash.
+      # Change both URLs if you fork the project under another account.
       - key: MINI_APP_URL
-        sync: false
+        value: https://artemmscode.github.io/caloria/
+      - key: CORS_ORIGINS
+        value: https://artemmscode.github.io
 
       # Session signing key (openssl rand -hex 48).
       - key: JWT_SECRET
@@ -46,20 +46,11 @@ services:
       # recommended for keeping reminders alive on the free plan.
       - key: CRON_SECRET
         sync: false
-      # Comma-separated browser origins. Include https://<github-user>.github.io
-      - key: CORS_ORIGINS
-        sync: false
 
-      # Supabase → Project Settings → API.
+      # Supabase → Project Settings → API Keys.
       - key: SUPABASE_URL
         sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
+      # Secret key (`sb_secret_...`). Legacy service_role JWTs also work
+      # through SUPABASE_SERVICE_ROLE_KEY if the project still uses old keys.
+      - key: SUPABASE_SECRET_KEY
         sync: false
-
-      # Optional integrations.
-      - key: FOOD_API_KEY
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: OPENAI_VISION_MODEL
-        value: gpt-4o-mini

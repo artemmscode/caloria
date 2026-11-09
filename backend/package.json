@@ -12,7 +12,8 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test --test-reporter=spec",
-    "check": "node --check src/server.js && node --check src/bot.js"
+    "check": "node --check src/server.js && node --check src/bot.js",
+    "db:check": "node scripts/check-supabase.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.49.4",

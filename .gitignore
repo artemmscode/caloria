@@ -8,6 +8,8 @@ node_modules/
 !.env.example
 !**/.env.example
 backend/.env.production.local
+RENDER_VALUES.local.txt
+*.local.txt
 
 # Local development data (JSON fallback store)
 .dev-data/
