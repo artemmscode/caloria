@@ -127,7 +127,8 @@ caloria/
 │   └── .env.example
 ├── database/migrations/
 │   ├── 001_init.sql          # таблицы, индексы, RLS, триггеры
-│   └── 002_seed_foods.sql    # проверенная база продуктов
+│   ├── 002_seed_foods.sql    # проверенная база продуктов
+│   └── 003_verify_schema.sql # проверка совместимости при переиспользовании проекта
 ├── scripts/                  # serve-frontend, prepare-pages, check-syntax
 ├── .github/workflows/deploy.yml
 ├── render.yaml
@@ -251,13 +252,14 @@ Frontend не использует Supabase напрямую и не храни�
 4. Выполните по очереди содержимое:
    - `database/migrations/001_init.sql`
    - `database/migrations/002_seed_foods.sql`
+   - `database/migrations/003_verify_schema.sql`
 5. Проверьте **Table Editor**: должны появиться `users`, `food_products`, `food_entries`, `weight_history`, `body_measurements`, `progress_photos`, `user_goals`, `reminder_settings`, `notification_logs`, `water_logs`, `favorites`, `bot_pending_entries`.
 6. Проверьте **Authentication → Policies** или SQL: RLS включён на всех таблицах.
 7. Скопируйте из **Project Settings → API**:
    - `Project URL` → `SUPABASE_URL`;
    - `service_role` secret → `SUPABASE_SERVICE_ROLE_KEY` (только Render, никогда frontend).
 
-Миграции идемпотентны: `create table if not exists`, `create index if not exists`. Повторный запуск безопасен.
+Миграции 001 и 002 идемпотентны: `create table if not exists`, `create index if not exists`. Повторный запуск безопасен. Скрипт 003 — только проверка: он ничего не меняет и завершится ошибкой, если структура не совпадает.
 
 > `service_role` обходит RLS. Он допустим только на сервере. Публичный `anon` key frontend не использует.
 
@@ -364,9 +366,62 @@ git push -u origin main
 
 ---
 
+## Если Supabase и Render уже существуют
+
+Переиспользовать существующие сервисы можно и часто быстрее, чем создавать новые. Но есть два важных условия.
+
+### Supabase
+
+1. Если проект **выделен только под CALORIA** — просто выполните:
+   - `database/migrations/001_init.sql`
+   - `database/migrations/002_seed_foods.sql`
+   - `database/migrations/003_verify_schema.sql`
+2. Если проект **общий с другим приложением**, сначала проверьте конфликты. `create table if not exists` не меняет уже существующие таблицы, а `public.users` — очень распространённое имя. Третий скрипт (`003_verify_schema.sql`) специально завершится ошибкой со списком отсутствующих колонок.
+3. При конфликте безопаснее создать отдельный Supabase-проект: это бесплатно и занимает пару минут. Не удаляйте таблицы чужого приложения.
+4. Возьмите **Project URL** и **service_role** key из Project Settings → API и добавьте их в Render. В frontend эти значения не нужны.
+
+### Render
+
+1. Откройте существующий Web Service → **Settings → Build & Deploy**.
+2. Укажите:
+   - Repository: `artemmscode/caloria`
+   - Branch: `main`
+   - Root Directory: `backend`
+   - Build Command: `npm ci --omit=dev`
+   - Start Command: `npm start`
+   - Health Check Path: `/api/health`
+3. **Environment** → добавьте переменные из `backend/.env.production.local` (файл не коммитится) и ключи Supabase. `WEBHOOK_URL` можно оставить пустым — Render подставит `RENDER_EXTERNAL_URL`.
+4. **Manual Deploy → Deploy latest commit**. Публичный URL сервиса останется прежним.
+5. Если старый сервис запускал другого бота, перед деплоем убедитесь, что `BOT_TOKEN` заменён на токен CALORIA. Старый webhook будет перезаписан автоматически.
+6. Persistent Disk не нужен: в production данные хранятся в Supabase.
+
+### Пингер на бесплатном плане
+
+Если у вас уже настроен внешний пингер (cron-job.org, UptimeRobot и т.п.):
+
+- URL: `https://<render-service>/api/cron/tick`
+- Method: `POST`
+- Header: `X-Cron-Secret: <CRON_SECRET из backend/.env.production.local>`
+- Интервал: 5–10 минут
+
+Такой пинг одновременно будит Render и запускает проверку напоминаний с окном догона 20 минут. Пинг только на `/api/health` тоже поддерживает сервис awake, но не запускает догон напоминаний.
+
+### После переиспользования
+
+Проверьте:
+
+```bash
+curl -s https://<render-service>/api/health
+curl -s "https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo"
+```
+
+Во втором ответе должен появиться `https://<render-service>/telegram/webhook` без `last_error_message`. Затем добавьте `API_BASE_URL=https://<render-service>` в GitHub Variables — workflow опубликует Pages.
+
+---
+
 ## Порядок первого развёртывания
 
-1. Supabase: создать проект → выполнить `001_init.sql` → `002_seed_foods.sql` → сохранить URL и `service_role`.
+1. Supabase: создать проект → выполнить `001_init.sql` → `002_seed_foods.sql` → `003_verify_schema.sql` → сохранить URL и `service_role`.
 2. BotFather: создать бота → сохранить токен и username.
 3. Render: создать сервис из `render.yaml` или вручную.
 4. Render: заполнить `BOT_TOKEN`, `WEBHOOK_SECRET`, `JWT_SECRET`, `MINI_APP_URL` (`https://artemmscode.github.io/caloria/`), `SUPABASE_*`, `CORS_ORIGINS` (`https://artemmscode.github.io`).
