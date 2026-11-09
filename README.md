@@ -291,6 +291,8 @@ curl "https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo"
 
 ## GitHub Pages: публикация frontend
 
+Репозиторий: <https://github.com/artemmscode/caloria> · адрес приложения после публикации: <https://artemmscode.github.io/caloria/>
+
 1. Создайте пустой репозиторий на GitHub (например, `caloria`).
 2. Загрузите проект:
 
@@ -320,6 +322,9 @@ git push -u origin main
 ---
 
 ## Render: backend и бот
+
+Репозиторий проекта: <https://github.com/artemmscode/caloria>
+Быстрое развёртывание Blueprint: <https://render.com/deploy?repo=https://github.com/artemmscode/caloria>
 
 ### Вариант A — Blueprint (рекомендуется)
 
@@ -364,7 +369,7 @@ git push -u origin main
 1. Supabase: создать проект → выполнить `001_init.sql` → `002_seed_foods.sql` → сохранить URL и `service_role`.
 2. BotFather: создать бота → сохранить токен и username.
 3. Render: создать сервис из `render.yaml` или вручную.
-4. Render: заполнить `BOT_TOKEN`, `WEBHOOK_SECRET`, `JWT_SECRET`, `MINI_APP_URL` (пока можно заглушку), `SUPABASE_*`, `CORS_ORIGINS`.
+4. Render: заполнить `BOT_TOKEN`, `WEBHOOK_SECRET`, `JWT_SECRET`, `MINI_APP_URL` (`https://artemmscode.github.io/caloria/`), `SUPABASE_*`, `CORS_ORIGINS` (`https://artemmscode.github.io`).
 5. GitHub: создать репозиторий, включить Pages (Source: GitHub Actions), добавить Variables `API_BASE_URL` и `BOT_USERNAME`.
 6. Push в `main` → дождаться зелёного workflow → открыть Pages URL.
 7. Render: обновить `MINI_APP_URL` и `CORS_ORIGINS` на реальный Pages URL → redeploy.
